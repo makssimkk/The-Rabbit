@@ -1,6 +1,8 @@
+import pygame
 from pygame import *
 from config import *
 import pyganim # для анимации нескольких картинок движения кролика
+from block import BlockDie, BlockCarrot
 
 
 class Player(sprite.Sprite):
@@ -54,8 +56,10 @@ class Player(sprite.Sprite):
         self.rabbit_animJump = pyganim.PygAnimation(ANIMATION_JUMP)
         self.rabbit_animJump.play()
 
-    def update(self, left, right, up, blocks): #обновляем право, лево, вверх, блоки
+        # счетчик
+        self.n_carrot = 0
 
+    def update(self, left, right, up, blocks): #обновляем право, лево, вверх, блоки
         if up: #движение вверх
             if self.onGround:  # если есть поверхность от которой можно оттолкнуться прыгает
                 self.y_movement_speed = -JUMP_POWER #скорость вертикального  перемещения =силе прыжка жвижется вверх
@@ -99,20 +103,39 @@ class Player(sprite.Sprite):
 # если таковое имеется, то  происходит действие.
         for p in blocks:
             if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+                if isinstance(p, BlockCarrot):  # если пересакаемый блок - шипы
+                    self.n_carrot += 1
+                    blocks.remove(p)
+                    p.delete()
 
-                if x_movement_speed > 0:  # если движется вправо
-                    self.rect.right = p.rect.left  # пеерсечение правой стороны игрока и платформы слева - не движится
-                    # вправо
+                else:
+                    if x_movement_speed > 0:  # если движется вправо
+                        self.rect.right = p.rect.left  # пеерсечение правой стороны игрока и платформы слева - не движится
+                        # вправо
 
-                if x_movement_speed < 0:  # если движется влево
-                    self.rect.left = p.rect.right  # пеерсечение левой стороны игрока и платформы справа - не движится
-                    # влево
+                    if x_movement_speed < 0:  # если движется влево
+                        self.rect.left = p.rect.right  # пеерсечение левой стороны игрока и платформы справа - не движится
+                        # влево
 
-                if y_movement_speed > 0:  # если падает вниз
-                    self.rect.bottom = p.rect.top  # пеерсечение нижней стороны игрока и платформы сверху
-                    self.onGround = True  # и становится на что-то твердое
-                    self.y_movement_speed = 0  # и энергия падения пропадает
+                    if y_movement_speed > 0:  # если падает вниз
+                        self.rect.bottom = p.rect.top  # пеерсечение нижней стороны игрока и платформы сверху
+                        self.onGround = True  # и становится на что-то твердое
+                        self.y_movement_speed = 0  # и энергия падения пропадает
 
-                if y_movement_speed < 0:  # если движется вверх
-                    self.rect.top = p.rect.bottom  # пеерсечение верхней стороны игрока и платформы снизу
-                    self.y_movement_speed = 0  # и энергия прыжка пропадает
+                    if y_movement_speed < 0:  # если движется вверх
+                        self.rect.top = p.rect.bottom  # пеерсечение верхней стороны игрока и платформы снизу
+                        self.y_movement_speed = 0  # и энергия прыжка пропадает
+
+                    if isinstance(p, BlockDie):  # если пересакаемый блок - шипы
+                        self.die()  # смерть
+
+    def die(self):
+        pygame.event.clear()
+        self.x_movement_speed = 0
+        self.y_movement_speed = 0
+        self.n_carrot = 0
+        pygame.event.post(pygame.event.Event(DIE_EVENT))
+
+    def teleporting(self, goX, goY):
+        self.rect.x = goX
+        self.rect.y = goY

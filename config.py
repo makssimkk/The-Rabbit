@@ -1,3 +1,5 @@
+import pygame
+
 #Окно параметры
 WINDOW_WIDTH = 800 # Ширина создаваемого окна
 WINDOW_HEIGHT = 500 # Высота
@@ -27,3 +29,5 @@ ANIMATION_JUMP_LEFT = [('rabbit/j1l-1.png'), #последовательност
 ANIMATION_JUMP_RIGHT = [('rabbit/j1r-1.png'), ('rabbit/j1r-2.png')] #последовательность кадров при движение вверх и вправо
 ANIMATION_JUMP = [('rabbit/j2-1.png', 1)] #кадр при прыжке вверх на месте
 ANIMATION_STAY = [('rabbit/r4-1.png', 1)] #кадр если кролик стоит на месте
+
+DIE_EVENT = pygame.USEREVENT + 1
