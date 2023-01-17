@@ -31,3 +31,14 @@ class Nora(Block):
         Block.__init__(self, x, y)
         self.image = image.load("Finish/TREE_HOUSE5-1.png")
 
+
+class BlockHeart(Block):
+    def __init__(self, x, y):
+        Block.__init__(self, x, y)
+        self.image = image.load('blocks/life.png')
+
+    def delete(self):
+        self.kill()
+
+
+

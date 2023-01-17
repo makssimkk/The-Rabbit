@@ -1,7 +1,7 @@
 from pygame import *
 from config import *
 import pyganim # для анимации нескольких картинок движения кролика
-from block import BlockDie, BlockCarrot, Nora
+from block import BlockDie, BlockCarrot, Nora, BlockHeart
 from monster import Monster
 
 
@@ -133,6 +133,10 @@ class Player(sprite.Sprite):
                     blocks.remove(p)
                     p.delete()
 
+                elif isinstance(p, BlockHeart):  # если пересакаемый блок - шипы
+                    self.lives += 1
+                    blocks.remove(p)
+                    p.delete()
 
                 else:
                     if x_movement_speed > 0:  # если движется вправо

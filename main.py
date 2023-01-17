@@ -4,7 +4,7 @@ from pygame import *
 from config import *
 from player import Player
 from camera import Camera, camera_configure
-from block import Block, BlockDie, BlockCarrot, Nora
+from block import Block, BlockDie, BlockCarrot, Nora, BlockHeart
 from monster import Monster
 from button import Button
 
@@ -103,12 +103,17 @@ class Game:
                     bc = BlockCarrot(x, y)
                     self.all_objects.add(bc)
                     self.blocks.append(bc)
+                if col == "h":
+                    bc = BlockHeart(x, y)
+                    self.all_objects.add(bc)
+                    self.blocks.append(bc)
 
                 x += BLOCK_WIDTH  # блоки платформы ставятся на ширине блоков
             y += BLOCK_HEIGHT  # то же самое и с высотой
             x = 0  # на каждой новой строчке начинаем с нуля
 
     def restart_level(self):
+        pygame.mixer.music.unpause()
         self.up = False
         self.left = self.right = False
         self.blocks.clear()
@@ -123,6 +128,7 @@ class Game:
         self.current_level += 1
         if self.current_level > MAX_LEVEL:
             self.current_level = 1
+            self.waiting_win = True
             self.show_winning()
         self.restart_level()
 
@@ -168,7 +174,7 @@ class Game:
             # где прорисовываются все объекты
             self.screen.blit(event.image, self.camera.apply(event)) # Каждую итерацию необходимо всё перерисовывать под положение
             # камеры относительно главного героя
-        self.draw_lives(WINDOW_WIDTH - 100, 5, self.hero.lives, self.player_mini_img)  # прорисовка колличства жизни кроликами
+        self.draw_lives(80, 10, self.hero.lives, self.player_mini_img)  # прорисовка колличства жизни кроликами
 
     def counter(self):
         # работа со счетчиком
@@ -180,13 +186,13 @@ class Game:
         self.screen.blit(img, (27, 0))
 
     def show_go_screen(self):
+        pygame.mixer.music.pause()
         # поле game over
         background = pygame.image.load('game over/game over3 500-800.jpg.png')
         self.screen.blit(background, (0, 0))
         pygame.display.flip()
 
         while self.game_over:
-            # pygame.time.Clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_over = False
@@ -199,6 +205,7 @@ class Game:
         self.restart_level()
 
     def show_winning(self):
+        pygame.mixer.music.pause()
         # win/continue
         bg = pygame.image.load('you win/заставка800-500.png')
         self.screen.blit(bg, (0, 0))
@@ -215,6 +222,7 @@ class Game:
 
         pygame.event.clear()
         self.restart_level()
+        self.hero.lives = 3
 
     def draw_lives(self, x, y, lives, img):
         for i in range(lives):
@@ -224,6 +232,7 @@ class Game:
             self.screen.blit(img, img_rect)
 
     def show_main_menu(self):
+        pygame.mixer.music.pause()
         # start menu
         bg = pygame.image.load('menu/main_menu1.jpg')
         self.screen.blit(bg, (0, 0))
@@ -265,6 +274,7 @@ class Game:
 
     def play(self, button):
         self.main_menu = False
+        pygame.mixer.music.unpause()
 
     def run(self):
         while self.running:  # Основной цикл программы
