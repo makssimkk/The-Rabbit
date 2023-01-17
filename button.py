@@ -1,51 +1,46 @@
-import sys
-import pygame
+from text import TextObject
+from config import *
+from pygame.rect import Rect
 
 
 class Button:
-    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.onclickFunction = onclickFunction
-        self.onePress = onePress
+    def __init__(self, x, y, w, h, text, on_click=lambda x: None, padding=0):
+        self.bounds = Rect(x, y, w, h)
+        self.state = 'normal'
+        self.on_click = on_click
 
-        self.fillColors = {
-            'normal': '#ffffff',
-            'hover': '#666666',
-            'pressed': '#333333',
-        }
+        self.text = TextObject(x + padding, y + padding - 10, lambda: text, BUTTON_TEXT_COLOR, FONT_NAME, FONT_SIZE)
 
-        self.buttonSurface = pygame.Surface((self.width, self.height))
-        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
-        font = pygame.font.SysFont('Arial', 40)
-        self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
+    @property
+    def back_color(self):
+        return dict(normal=BUTTON_NORMAL_COLOR,
+                    hover=BUTTON_HOVER_COLOR,
+                    pressed=BUTTON_PRESS_COLOR)[self.state]
 
-        self.alreadyPressed = False
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.back_color, self.bounds)
+        self.text.draw(surface)
 
-    def process(self, screen):
-        mouse_pos = pygame.mouse.get_pos()
-        print(mouse_pos)
-        self.buttonSurface.fill(self.fillColors['normal'])
-        if self.buttonRect.collidepoint(mouse_pos):
-            self.buttonSurface.fill(self.fillColors['hover'])
+    def handle_mouse_event(self, type, pos):
+        if type == pygame.MOUSEMOTION:
+            self.handle_mouse_move(pos)
+        elif type == pygame.MOUSEBUTTONDOWN:
+            self.handle_mouse_down(pos)
+        elif type == pygame.MOUSEBUTTONUP:
+            self.handle_mouse_up(pos)
 
-            if pygame.mouse.get_pressed(num_buttons=3)[0]:
-                self.buttonSurface.fill(self.fillColors['pressed'])
+    def handle_mouse_move(self, pos):
+        if self.bounds.collidepoint(pos):
+            if self.state != 'pressed':
+                self.state = 'hover'
+        else:
+            self.state = 'normal'
 
-                if self.onePress:
-                    self.onclickFunction()
+    def handle_mouse_down(self, pos):
+        if self.bounds.collidepoint(pos):
+            self.state = 'pressed'
 
-                elif not self.alreadyPressed:
-                    self.onclickFunction()
-                    self.alreadyPressed = True
-
-            else:
-                self.alreadyPressed = False
-
-        self.buttonSurface.blit(self.buttonSurf, [
-            self.buttonRect.width / 2 - self.buttonSurf.get_rect().width / 2,
-            self.buttonRect.height / 2 - self.buttonSurf.get_rect().height / 2
-        ])
-        screen.blit(self.buttonSurface, self.buttonRect)
+    def handle_mouse_up(self, pos):
+        if self.state == 'pressed':
+            self.on_click(self)
+            self.state = 'hover'

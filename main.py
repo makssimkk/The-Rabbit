@@ -7,8 +7,6 @@ from camera import Camera, camera_configure
 from block import Block, BlockDie, BlockCarrot, Nora
 from monster import Monster
 from button import Button
-import pygame_menu
-from pygame_menu import themes
 
 
 class Game:
@@ -30,19 +28,12 @@ class Game:
         self.playerX = 0
         self.playerY = 0
 
-        self.hero = Player(40, 630)  # начальная создаем героя по (x,y) координатам
-        self.left = self.right = False  # по умолчанию - стоим
-        self.up = False
-
         self.all_objects = pygame.sprite.Group()  # Все объекты
         self.blocks = []  # то, во что мы будем врезаться или опираться
 
-        self.all_objects.add(self.hero)
-        self.timer = pygame.time.Clock()
-
         self.monsters = pygame.sprite.Group()  # Все передвигающиеся объекты
 
-        self.current_level = 3
+        self.current_level = 1
         self.level = []
         self.load_level(self.current_level)
 
@@ -50,6 +41,13 @@ class Game:
             self.level[0]) * BLOCK_WIDTH  # Создаем большой прямоугольник уровня. Это дляя камеры Высчитываем
         # фактическую  ширину уровня
         total_level_height = len(self.level) * BLOCK_HEIGHT  # высоту
+
+        self.hero = Player(self.playerX, self.playerY)  # начальная создаем героя по (x,y) координатам
+        self.left = self.right = False  # по умолчанию - стоим
+        self.up = False
+
+        self.all_objects.add(self.hero)
+        self.timer = pygame.time.Clock()
 
         self.camera = Camera(camera_configure, total_level_width, total_level_height)
         self.running = True
@@ -144,7 +142,6 @@ class Game:
                 self.restart_level()
             if event.type == WIN_EVENT:
                 self.next_level()
-                #self.waiting_win = True
             if event.type == KEYDOWN and event.key == K_UP:
                 self.up = True
             if event.type == KEYDOWN and event.key == K_LEFT:
@@ -187,27 +184,37 @@ class Game:
         background = pygame.image.load('game over/game over3 500-800.jpg.png')
         self.screen.blit(background, (0, 0))
         pygame.display.flip()
-        waiting = True
-        while waiting:
+
+        while self.game_over:
             # pygame.time.Clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
+                    self.game_over = False
+                    self.running = False
                 if event.type == pygame.KEYDOWN:
-                    waiting = False
+                    self.game_over = False
+                    self.main_menu = True
+
+        pygame.event.clear()
+        self.restart_level()
 
     def show_winning(self):
         # win/continue
         bg = pygame.image.load('you win/заставка800-500.png')
         self.screen.blit(bg, (0, 0))
         pygame.display.flip()
-        waiting = True
-        while waiting:
+
+        while self.waiting_win:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
+                    self.waiting_win = False
+                    self.running = False
                 if event.type == pygame.KEYDOWN:
-                    waiting = False
+                    self.waiting_win = False
+                    self.main_menu = True
+
+        pygame.event.clear()
+        self.restart_level()
 
     def draw_lives(self, x, y, lives, img):
         for i in range(lives):
@@ -216,53 +223,71 @@ class Game:
             img_rect.y = y
             self.screen.blit(img, img_rect)
 
-    def start_game(self):
-        print('jopa')
-
     def show_main_menu(self):
-        # win/continue
-        bg = pygame.image.load('you win/заставка800-500.png')
+        # start menu
+        bg = pygame.image.load('menu/main_menu1.jpg')
         self.screen.blit(bg, (0, 0))
-        btn = Button(30, 30, 400, 100, 'Играть', self.start_game)
-        btn.process(self.screen)
+
+        mouse_handlers = []
+        buttons = []
+        for i, (text, click_handler) in enumerate((('PLAY', self.play), ('QUIT', self.exit))):
+            b = Button(MENU_OFFSET_X,
+                       MENU_OFFSET_Y + (MENU_BUTTON_H + 15) * i,
+                       MENU_BUTTON_W,
+                       MENU_BUTTON_H,
+                       text,
+                       click_handler,
+                       padding=15)
+            b.draw(self.screen)
+            mouse_handlers.append(b.handle_mouse_event)
+            buttons.append(b)
+
         pygame.display.flip()
-        waiting = True
-        while waiting:
+
+        while self.main_menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                if event.type == pygame.KEYDOWN:
-                    waiting = False
+                    self.main_menu = False
+                    self.running = False
+                if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION):
+                    for handler in mouse_handlers:
+                        handler(event.type, event.pos)
+
+            for b in buttons:
+                b.draw(self.screen)
+
             pygame.display.update()
             self.timer.tick(60)
+
+    def exit(self, button):
+        self.main_menu = False
+        self.running = False
+
+    def play(self, button):
+        self.main_menu = False
+
+    def run(self):
+        while self.running:  # Основной цикл программы
+            if self.main_menu:
+                self.show_main_menu()
+
+            if self.game_over:  # если игра закончилась
+                self.show_go_screen()  # подключаем функцию ожидания для этого состояния или крестик и выход или перезапуск
+
+            if self.waiting_win:
+                self.show_winning()
+
+            self.listen_event()
+            self.tick()
+            self.counter()
+            pygame.display.update()  # обновление и вывод всех изменений на экранн
 
 
 def main():
     pygame.init()  # Инициация PyGame, обязательная строчка
     game = Game()
     game.draw_level()
-
-    while game.running:  # Основной цикл программы
-        if game.main_menu:
-            game.show_main_menu()
-            game.main_menu = False
-
-        if game.game_over: #если игра закончилась
-            game.show_go_screen()  # подключаем функцию ожидания для этого состояния или крестик и выход или перезапуск
-            game.game_over = False
-            pygame.event.clear()
-            game.restart_level()
-
-        if game.waiting_win:
-            game.show_winning()
-            game.waiting_win = False
-            pygame.event.clear()
-            game.restart_level()
-
-        game.listen_event()
-        game.tick()
-        game.counter()
-        pygame.display.update()  # обновление и вывод всех изменений на экранн
+    game.run()
 
 
 if __name__ == '__main__':
