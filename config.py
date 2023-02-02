@@ -44,20 +44,23 @@ ANIMATION_JUMP_RIGHT = [('rabbit/j1r-1.png'),
 ANIMATION_JUMP = [('rabbit/j2-1.png', 1)]  # кадр при прыжке вверх на месте
 ANIMATION_STAY = [('rabbit/r4-1.png', 1)]  # кадр если кролик стоит на месте
 
+# цвета для кнопок
 BUTTON_TEXT_COLOR = '#73af55'
 BUTTON_NORMAL_COLOR = '#ffffff'
 BUTTON_HOVER_COLOR = '#ff0000'
 BUTTON_PRESS_COLOR = '#ffffff'
 
+# конфигурация текста
 FONT_NAME = 'Arial'
 FONT_SIZE = 40
 
+# координаты кнопок
 MENU_OFFSET_X = 140
 MENU_OFFSET_Y = 190
 MENU_BUTTON_W = 120
 MENU_BUTTON_H = 55
 
-
+# работа с событиями pygame
 DIE_EVENT = pygame.USEREVENT + 1
 WIN_EVENT = pygame.USEREVENT + 2
 GAME_OVER_EVENT = pygame.USEREVENT + 3

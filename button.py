@@ -1,9 +1,11 @@
+# импорт библиотек
 from text import TextObject
 from config import *
 from pygame.rect import Rect
 
 
 class Button:
+    # инициализация
     def __init__(self, x, y, w, h, text, on_click=lambda x: None, padding=0):
         self.bounds = Rect(x, y, w, h)
         self.state = 'normal'
@@ -17,6 +19,7 @@ class Button:
                     hover=BUTTON_HOVER_COLOR,
                     pressed=BUTTON_PRESS_COLOR)[self.state]
 
+    # отрисовка кнопок
     def draw(self, surface):
         pygame.draw.rect(surface, self.back_color, self.bounds)
         self.text.draw(surface)

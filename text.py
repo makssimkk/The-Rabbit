@@ -1,7 +1,10 @@
+# импортируем pygame
 import pygame
 
 
+# класс для отрисовки текста на кнопках
 class TextObject:
+    # инициализация
     def __init__(self, x, y, text_func, color, font_name, font_size):
         self.pos = (x, y)
         self.text_func = text_func
@@ -9,6 +12,7 @@ class TextObject:
         self.font = pygame.font.SysFont(font_name, font_size)
         self.bounds = self.get_surface(text_func())
 
+    # отрисовка текста
     def draw(self, surface, centralized=False):
         text_surface, self.bounds = self.get_surface(self.text_func())
         if centralized:
