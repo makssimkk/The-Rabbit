@@ -1,6 +1,9 @@
+# импортируем библиотеки
 from pygame import *
 from config import *
 import pyganim # для анимации нескольких картинок движения кролика
+
+# импортируем классы из других файлов
 from block import BlockDie, BlockCarrot, Nora, BlockHeart
 from monster import Monster
 
@@ -104,9 +107,10 @@ class Player(sprite.Sprite):
         self.rect.x += self.x_movement_speed  # переносим свои положение на скорость перемещения по горизонтали
         self.collide(self.x_movement_speed, 0, blocks)
 
+    # проверка на пересечение координат героя и платформ,
+    # если таковое имеется, то  происходит действие.
     def collide(self, x_movement_speed, y_movement_speed,
-                blocks):  # проверка на пересечение координат героя и платформ,
-        # если таковое имеется, то  происходит действие.
+                blocks):
         for p in blocks:
             if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
                 if isinstance(p, BlockDie) or isinstance(p, Monster):  # если пересакаемый блок - blocks.BlockDie или Monster
@@ -156,23 +160,28 @@ class Player(sprite.Sprite):
                         self.rect.top = p.rect.bottom  # пеерсечение верхней стороны игрока и платформы снизу
                         self.y_movement_speed = 0  # и энергия прыжка пропадает
 
+    # смерть
     def die(self):
         pygame.event.clear()
         self.n_carrot = 0
         pygame.event.post(pygame.event.Event(DIE_EVENT))
 
+    # конец игры
     def game_over(self):
         pygame.event.clear()
         self.n_carrot = 0
         pygame.event.post(pygame.event.Event(GAME_OVER_EVENT))
 
+    # метод перемещения кролика на переданные координаты
     def teleporting(self, goX, goY):
         self.rect.x = goX
         self.rect.y = goY
 
+    # установить количество жизней по умолчанию
     def restore_lives(self):
         self.lives = 3
 
+    # удалить кролика
     def delete(self):
         self.kill()
 

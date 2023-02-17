@@ -1,8 +1,11 @@
+# импорт библиотек
 from pygame import *
 from config import WINDOW_WIDTH, WINDOW_HEIGHT
 
 
+# класс камеры
 class Camera(object):
+    # инициализация
     def __init__(self, camera_func, width, height):
         self.camera_func = camera_func
         self.state = Rect(0, 0, width, height)
@@ -14,7 +17,8 @@ class Camera(object):
         self.state = self.camera_func(self.state, target.rect)
 
 
-def camera_configure(camera, target_rect):  # начальное конфигурирование камеры
+# начальное конфигурирование камеры
+def camera_configure(camera, target_rect):
     l, t, _, _ = target_rect
     _, _, w, h = camera
     l, t = -l + WINDOW_WIDTH / 2, -t + WINDOW_HEIGHT / 2
